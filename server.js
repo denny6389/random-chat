@@ -4,8 +4,8 @@ var fs = require('fs');
 var socket_io = require('socket.io');
 
 var server = app.createServer(function handler(req, res) {
-  fs.readfile(__dirname + '/index.html');
-});
+  fs.readfile(__dirname + '/chat.html');
+});3
 
 var io = socket_io.listen(server);
 
