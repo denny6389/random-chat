@@ -1,47 +1,31 @@
 /* Server source*/
-/*
-var io = require('socket.io').listen(50000);
+var app = require('http');
+var fs = require('fs');
+var socket_io = require('socket.io');
 
-io.sockets.on('connection', function (socket){
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
-  });
+var server = app.createServer(function handler(req, res) {
+  fs.readfile(__dirname + '/index.html');
 });
+
+var io = socket_io.listen(server);
+
+/*
+app.get('/main.css', (req,res) => {
+  res.sendFile(__dirname + '/main.css');
+});
+
+var socket_room = {};
 */
 
-var app = require('express')();
-var http = require('http').createServer(app);
-
-app.get('/', function(req, res){
-  res.send('<h1>Hello world</h1>');
-});
-
-http.listen(3000, function(){
-  console.log('listening on *:3000');
-});
-
-var io = require('socket.io').listen(50000);
 io.sockets.on('connection', function(socket) {
-  socket.emit('connection', {
-    type : 'connected'
-  });
-  socket.on('connection', function(data) {
-    if(data.type == 'join') {
-      socket.join(data.room);
-      socket.set('room', data.room);
-      socket.emit('system', {
-        message : '채팅방에 오신 것을 환영합니다.'
-      });
 
-      socket.broadcast.to(data.room).emit('system', {
-        message : data.name + '님이 접속하셨습니다.' }
-      );
-    }
+  //User got connected to the random chat
+  console.log('User entered the random chat lobby');
+  socket.emit('connected');
+
+  //User wants to send a message
+  socket.on('send_message', function(data) {
+    console.log('Senging message...');
+    io.emit('receive_message', data);
   });
-  socket.on('user', function(data) {
-    socket.get('room', function(error, room) {
-       socket.broadcast.to(room).emit('message', data);
-     });
-   });
  });
