@@ -56,10 +56,10 @@
   <div id="container">
         <div id="chatView">
         </div>
-        <form id="chatForm" onsubmit="return false">
-            <input type="text" id="msg">
-            <input type="submit" id="send" value="Send">
-        </form>
+        <input id="name" class="name" type="text" readonly>
+            <button onclick="rename_submit();">닉네임 변경</button>
+              <input id="message" onkeydown="JavaScript:Enter_Check();" class="message" type="text" autocomplete="off">
+              <button onclick="chat_submit();">전송</button>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
