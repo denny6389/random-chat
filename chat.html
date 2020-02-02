@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+
     <style>
       #container {
             width: max-width;
@@ -22,16 +23,16 @@
             background-color: black;
             text-align: center;
         }
-        #msg {
+        #message {
           float:left;
             width: 80%;
-            height: 10px;
+            height: 50px;
             border-radius: 8px;
         }
         #send {
           float:left;
             width: 16%;
-            height: 34px;
+            height:50px;
             border-radius: 50px;
             background: black;
             color: white;
@@ -51,21 +52,41 @@
 
         }
     </style>
+
 </head>
 <body>
-  <div id="container">
-        <div id="chatView">
-        </div>
-        <form id="chatForm" onsubmit="return false">
-            <input type="text" id="msg">
-            <input type="submit" id="send" value="Send">
-        </form>
-    </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <div id = "container">
+    <div id = "chatView"></div>
+    <input id="message" onkeydown="JavaScript:Enter_Check();" class="message" type="text" autocomplete="off">
+    <button id = "send" onclick="chat_submit();">send</button>
+  </div>
+
+    <script src="//code.jquery.com/jquery-1.11.1.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var socket = io();
 
+        socket.on('receive message', function(message) {
+          var page = document.createElement('p');
+          var text = document.createTextNode(message);
+          page.appendChild(text);
+          document.getElementById('chatView').appendChild(page);
+          var scroll = document.getElementById('chatView');
+          scroll.scrollTop = scroll.scrollHeight;
+        });
+
+        function chat_submit() {
+	        socket.emit('send message', $('#message').val());
+	        $('#message').val("");
+	        $("#message").focus();
+	        e.preventDefault();
+        }
+        function Enter_Check(){
+	        if(event.keyCode == 13){
+            chat_submit();
+		        document.getElementById('message').value = "";
+	       }
+        }
     </script>
 </body>
 </html>

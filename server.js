@@ -1,21 +1,22 @@
 /* Server source*/
-var app = require('http');
+var http = require('http');
 var fs = require('fs');
-var socket_io = require('socket.io');
+var socket_io = require('socket.io').listen(http);
 
-var server = app.createServer(function handler(req, res) {
-  fs.readfile(__dirname + '/chat.html');
-});3
+var server = http.createServer(function handler(req, res) {
 
-var io = socket_io.listen(server);
-
-/*
-app.get('/main.css', (req,res) => {
-  res.sendFile(__dirname + '/main.css');
+  var url = req.url;
+  if (req.url == '/') {
+    url = '/chat.html';
+  }
+  if (req.url == '/favicon.ico') {
+    return res.writeHead(404);
+  }
+  res.writeHead(200);
+  res.end(fs.readFileSync(__dirname + url));
 });
 
-var socket_room = {};
-*/
+var io = socket_io.listen(server);
 
 io.sockets.on('connection', function(socket) {
 
@@ -24,8 +25,10 @@ io.sockets.on('connection', function(socket) {
   socket.emit('connected');
 
   //User wants to send a message
-  socket.on('send_message', function(data) {
-    console.log('Senging message...');
-    io.emit('receive_message', data);
+  socket.on('send message', function(data) {
+    console.log(socket.id + ': ' + data);
+    io.emit('receive message', data);
   });
  });
+
+ server.listen(5000);
