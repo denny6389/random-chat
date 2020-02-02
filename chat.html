@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+      #container {
+            width: max-width;
+            height: 700px;
+            border: none;
+            background: ivory;
+        }
+        #chatView {
+            height: 90%;
+            overflow-y: scroll;
+        }
+        #chatForm {
+            height: 10%;
+            border-top: none;
+            background-color: black;
+            text-align: center;
+        }
+        #msg {
+          float:left;
+            width: 80%;
+            height: 10px;
+            border-radius: 8px;
+        }
+        #send {
+          float:left;
+            width: 16%;
+            height: 34px;
+            border-radius: 50px;
+            background: black;
+            color: white;
+        }
+
+        #headContainer {
+          width: max-width;
+          height: 200px;
+          color: white;
+
+        }
+
+        #secondMsg {
+          width: auto;
+          height: 50px;
+          border-radius: 8px;
+
+        }
+    </style>
+</head>
+<body>
+  <div id="container">
+        <div id="chatView">
+        </div>
+        <form id="chatForm" onsubmit="return false">
+            <input type="text" id="msg">
+            <input type="submit" id="send" value="Send">
+        </form>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+
+    </script>
+</body>
+</html>
