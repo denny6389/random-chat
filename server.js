@@ -18,16 +18,24 @@ var server = http.createServer(function handler(req, res) {
 
 var io = socket_io.listen(server);
 
-io.sockets.on('connection', function(socket) {
+var nick_name = ["Vanila", "Chocolate", "Strawberry", "Matcha", "Cappuccino"];
+
+io.on('connection', function(socket) {
 
   //User got connected to the random chat
   console.log('User entered the random chat lobby');
   socket.emit('connected');
 
+  var name = nick_name[Math.floor(Math.random()*5)];
+
+  io.to(socket.id).emit('change name', name);
+
   //User wants to send a message
-  socket.on('send message', function(data) {
-    console.log(socket.id + ': ' + data);
-    io.emit('receive message', data);
+  socket.on('send message', (name,text) => {
+    console.log(name);
+
+    massage = name + ':' + text;
+    io.emit('receive message', massage);
   });
  });
 

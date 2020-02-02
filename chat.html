@@ -23,6 +23,12 @@
             background-color: black;
             text-align: center;
         }
+        #name {
+          border: none;
+        	height: 30px;
+        	width: 10%;
+        	background: #ddd;
+        }
         #message {
           float:left;
             width: 80%;
@@ -57,6 +63,7 @@
 <body>
   <div id = "container">
     <div id = "chatView"></div>
+    <input id="name" class="name" type="text" readonly>
     <input id="message" onkeydown="JavaScript:Enter_Check();" class="message" type="text" autocomplete="off">
     <button id = "send" onclick="chat_submit();">send</button>
   </div>
@@ -75,8 +82,12 @@
           scroll.scrollTop = scroll.scrollHeight;
         });
 
+        socket.on('change name', function(name) {
+          $('#name').val(name);
+        });
+
         function chat_submit() {
-	        socket.emit('send message', $('#message').val());
+	        socket.emit('send message', $('#name').val(), $('#message').val());
 	        $('#message').val("");
 	        $("#message").focus();
 	        e.preventDefault();
