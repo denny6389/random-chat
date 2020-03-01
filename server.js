@@ -34,8 +34,8 @@ io.on('connection', function(socket) {
   socket.on('send message', (name,text) => {
     console.log(name);
 
-    massage = name + ':' + text;
-    io.emit('receive message', massage);
+    //massage = name + ': ' + text;
+    io.emit('receive message', name,text);
   });
  });
 

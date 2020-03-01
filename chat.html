@@ -7,76 +7,114 @@
     <title>Document</title>
 
     <style>
-      #container {
+      /*#container {
             width: max-width;
             height: 700px;
             border: none;
-            background: ivory;
+        }*/
+        .chatView {
+
+          max-width: 850px;
+          width: 100%;
+          margin-right: auto;
+          margin-left: auto;
+          height: 95vh;
+          padding-bottom: 30px;
+          overflow: scroll;
+          /*
+          height: 90%;
+          overflow-y: scroll;
+          */
         }
-        #chatView {
-            height: 90%;
-            overflow-y: scroll;
+
+        .chatView > p {
+            display: inline-block;
+            padding: 15px;
+	          margin: 10px;
+	          background-color: rgba(235,235,235);
+	          border-radius: 10px;
+	          float: left;
+	          clear: both;
         }
-        #chatForm {
-            height: 10%;
-            border-top: none;
-            background-color: black;
-            text-align: center;
+
+        .chatView > p.myMessage {
+          color: white;
+	         background-color: rgba(60,160,255);
+	         float: right;
+	         clear: both;
         }
-        #name {
+
+        .chat_message {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          background-color: rgba(255,255,255,0.8);
+          text-align: center;
+          /*
+          margin: 0 auto;
+          width: 70%;
           border: none;
-        	height: 30px;
-        	width: 10%;
-        	background: #ddd;
+          padding: 5px;
+          background: rgba(255,255,255,1);
+          */
+        }
+
+        #name {
+
+          font-size: 15px;
+          border: none;
+        	height: 50px;
+        	width: 7%;
+          margin-right: 10px;
+
         }
         #message {
-          float:left;
-            width: 80%;
+            width: 70%;
             height: 50px;
-            border-radius: 8px;
+            background-color: rgba(220,220,220);
+            border-radius: 50px;
+            border: none;
+            font-size: 15px;
         }
         #send {
-          float:left;
-            width: 16%;
+            width: 7%;
             height:50px;
             border-radius: 50px;
+            font-size: 15px;
             background: black;
             color: white;
         }
 
-        #headContainer {
-          width: max-width;
-          height: 200px;
-          color: white;
-
-        }
-
-        #secondMsg {
-          width: auto;
-          height: 50px;
-          border-radius: 8px;
-
-        }
     </style>
 
 </head>
 <body>
-  <div id = "container">
-    <div id = "chatView"></div>
-    <input id="name" class="name" type="text" readonly>
-    <input id="message" onkeydown="JavaScript:Enter_Check();" class="message" type="text" autocomplete="off">
-    <button id = "send" onclick="chat_submit();">send</button>
-  </div>
+  <!--<div id = "container">-->
+    <div id = "chatView" class = "chatView">
+      <!--<p></p>
+      <p class = "myMessage"></p>-->
+    </div>
+    <div class = "chat_message">
+      <input id="name" class="name" type="text" readonly>
+      <input id="message" onkeydown="JavaScript:Enter_Check();" class="message" type="text" autocomplete="off">
+      <button id = "send" onclick="chat_submit();">send</button>
+    </div>
+  <!--</div>-->
 
     <script src="//code.jquery.com/jquery-1.11.1.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var socket = io();
 
-        socket.on('receive message', function(message) {
+        socket.on('receive message', function(name,message) {
           var page = document.createElement('p');
-          var text = document.createTextNode(message);
-          page.appendChild(text);
+          var text = name + ' : ' + message;
+          if (name == $('#name').val()) {
+            page.className = 'myMessage';
+            text = message;
+          }
+          page.appendChild(document.createTextNode(text));
           document.getElementById('chatView').appendChild(page);
           var scroll = document.getElementById('chatView');
           scroll.scrollTop = scroll.scrollHeight;
@@ -92,6 +130,7 @@
 	        $("#message").focus();
 	        e.preventDefault();
         }
+
         function Enter_Check(){
 	        if(event.keyCode == 13){
             chat_submit();
