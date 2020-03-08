@@ -61,11 +61,11 @@
         }
 
         #name {
-
           font-size: 15px;
+          font-weight: bold;
           border: none;
         	height: 50px;
-        	width: 7%;
+        	width: 10%;
           margin-right: 10px;
 
         }
@@ -91,7 +91,10 @@
 </head>
 <body>
   <!--<div id = "container">-->
-    <div id = "chatView" class = "chatView">
+    <div class = "waitingZone" style="display:none">
+      <div>Waiting for a stranger...</div>
+    </div>
+    <div id = "chatView" class = "chatView" style="display:none">
       <!--<p></p>
       <p class = "myMessage"></p>-->
     </div>
@@ -107,6 +110,27 @@
     <script>
         var socket = io();
 
+        socket.on('connected', function() {
+          $('.waitingZone').show();
+          $('.chatView').hide();
+          socket.emit('requestRandomChat');
+        });
+
+        socket.on('Username', function(name) {
+          $('#name').val(name);
+        });
+
+        socket.on('completeMatch', (room_info) => {
+          if (!room_info.matched) {
+            console.log('Still looking for random match...');
+          }
+          else {
+            console.log('Match completed');
+            $('.waitingZone').hide();
+            $('.chatView').show();
+          }
+        });
+
         socket.on('receive message', function(name,message) {
           var page = document.createElement('p');
           var text = name + ' : ' + message;
@@ -120,9 +144,6 @@
           scroll.scrollTop = scroll.scrollHeight;
         });
 
-        socket.on('change name', function(name) {
-          $('#name').val(name);
-        });
 
         function chat_submit() {
 	        socket.emit('send message', $('#name').val(), $('#message').val());
