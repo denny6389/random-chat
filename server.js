@@ -1,31 +1,85 @@
 /* Server source*/
-var app = require('http');
+var http = require('http');
 var fs = require('fs');
-var socket_io = require('socket.io');
+var socket_io = require('socket.io').listen(http);
 
-var server = app.createServer(function handler(req, res) {
-  fs.readfile(__dirname + '/index.html');
+var server = http.createServer(function handler(req, res) {
+
+  var url = req.url;
+  if (req.url == '/') {
+    url = '/chat.html';
+  }
+  if (req.url == '/favicon.ico') {
+    return res.writeHead(404);
+  }
+  res.writeHead(200);
+  res.end(fs.readFileSync(__dirname + url));
 });
 
 var io = socket_io.listen(server);
 
-/*
-app.get('/main.css', (req,res) => {
-  res.sendFile(__dirname + '/main.css');
-});
+const totalRoomList = {};
+const totalUserList = {};
+const waitingQueue = [];
 
-var socket_room = {};
-*/
+var nick_name = ["Vanila", "Chocolate", "Strawberry", "Matcha", "Cappuccino"];
 
-io.sockets.on('connection', function(socket) {
+io.on('connection', function(socket) {
 
   //User got connected to the random chat
   console.log('User entered the random chat lobby');
   socket.emit('connected');
 
+  var name = nick_name[Math.floor(Math.random()*5)];
+
+  io.to(socket.id).emit('Username', name);
+
+  socket.on('requestRandomChat', (name) => {
+    totalUserList[socket.id] = name;
+    if (waitingQueue.length > 0) {
+      if (waitingQueue[0].id !== socket.id) {
+        const partner = waitingQueue.shift();
+        const room_key = socket.id + partner.id;
+        socket.join(room_key);
+        partner.join(room_key);
+
+        totalRoomList[socket.id] = room_key;
+        totalRoomList[partner.id] = room_key;
+
+        io.to(socket.id).emit('completeMatch', {
+          matched: true,
+          room_key,
+          partner: {
+            id: partner.id,
+            name: totalUserList[partner.id]
+          }
+        });
+        io.to(partner.id).emit('completeMatch', {
+          matched: true,
+          room_key,
+          partner: {
+            id: socket.id,
+            name: totalUserList[socket.id]
+          }
+        });
+      }
+    }
+    else {
+      waitingQueue.push(socket);
+      io.to(socket.id).emit('completeMatch', {
+        matched: false
+      });
+    }
+  });
+
   //User wants to send a message
-  socket.on('send_message', function(data) {
-    console.log('Senging message...');
-    io.emit('receive_message', data);
+  socket.on('send message', (name,text) => {
+    const room_key = totalRoomList[socket.id];
+    console.log(name);
+
+    //massage = name + ': ' + text;
+    io.sockets.in(room_key).emit('receive message', name,text);
   });
  });
+
+ server.listen(5000);
