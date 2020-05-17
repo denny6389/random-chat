@@ -25,15 +25,8 @@ const waitingQueue = [];
 var nick_name = ["Vanila", "Chocolate", "Strawberry", "Matcha", "Cappuccino"];
 
 io.on('connection', function(socket) {
-
-  //User got connected to the random chat
-  console.log('User entered the random chat lobby');
   socket.emit('connected');
-
-  var name = nick_name[Math.floor(Math.random()*5)];
-
-  io.to(socket.id).emit('Username', name);
-
+  
   socket.on('requestRandomChat', (name) => {
     totalUserList[socket.id] = name;
     if (waitingQueue.length > 0) {
