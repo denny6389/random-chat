@@ -1,81 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
+<title>Ranom|Matching|Chatting|Discover</title>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="style.css">
 
 </head>
+
 <body>
-  <!--<div id = "container">-->
-    <div class = "waitingZone" style="display:none">
-      <div>Waiting for a stranger...</div>
+  <div class="waitingZone" style="display:none">
+    <div class="annoucement">Waiting for a stranger...</div>
+  </div>
+  <div id="chatView" class="chatView" style="display:none">
+    <div id="strangerInfo">
+      <div id = "stranger"></div>
+      <div id = "online"></div>
     </div>
-    <div id = "chatView" class = "chatView" style="display:none">
-      <!--<p></p>
-      <p class = "myMessage"></p>-->
-    </div>
-    <div class = "chat_message">
-      <input id="name" class="name" type="text" readonly>
-      <input id="message" onkeydown="JavaScript:Enter_Check();" class="message" type="text" autocomplete="off">
-      <button id = "send" onclick="chat_submit();">send</button>
-    </div>
-  <!--</div>-->
+    <div class="annoucement">Stranger has entered. Enjoy!</div>
+  </div>
+  <div class="chat_message">
+    <input id="name" class="name" type="text" readonly>
+    <input id="message" onkeydown="JavaScript:Enter_Check();" class="message" type="text" autocomplete="off">
+    <button id="send" onclick="chat_submit();">send</button>
+  </div>
 
-    <script src="//code.jquery.com/jquery-1.11.1.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        var socket = io();
+  <script src="//code.jquery.com/jquery-1.11.1.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
 
-        socket.on('connected', function() {
-          var name = prompt("Hello!", 'Please enter your name');
-          $('#name').val(name);
-          $('.waitingZone').show();
-          $('.chatView').hide();
+    socket.on('connected', function() {
+      var name = prompt("Hello!", 'Please enter your name');
+      if (!name) {
+        var name = 'Anonymous';
+      }
+      $('#name').val(name);
+      $('.waitingZone').show();
+      $('.chatView').hide();
 
-          socket.emit('requestRandomChat');
-        });
+      socket.emit('requestRandomChat', $('#name').val());
+    });
 
-        socket.on('completeMatch', (room_info) => {
-          if (!room_info.matched) {
-            console.log('Still looking for random match...');
-          }
-          else {
-            console.log('Match completed');
-            $('.waitingZone').hide();
-            $('.chatView').show();
-          }
-        });
+    socket.on('completeMatch', (room_info) => {
+      if (!room_info.matched) {
+        //console.log('Still looking for random match...');
+      } else {
+        //console.log('Match completed');
+        $('.waitingZone').hide();
+        $('.chatView').show();
+        $('#stranger').html(room_info.partner.name);
+      }
+    });
 
-        socket.on('receive message', function(name,message) {
-          var page = document.createElement('p');
-          var text = name + ' : ' + message;
-          if (name == $('#name').val()) {
-            page.className = 'myMessage';
-            text = message;
-          }
-          page.appendChild(document.createTextNode(text));
-          document.getElementById('chatView').appendChild(page);
-          var scroll = document.getElementById('chatView');
-          scroll.scrollTop = scroll.scrollHeight;
-        });
+    socket.on('receive message', function(name, message) {
+      var page = document.createElement('p');
+      var text = message;
+      if (name == $('#name').val()) {
+        page.className = 'myMessage';
+        text = message;
+      }
+      page.appendChild(document.createTextNode(text));
+      document.getElementById('chatView').appendChild(page);
+      var scroll = document.getElementById('chatView');
+      scroll.scrollTop = scroll.scrollHeight;
+    });
 
+    socket.on('leftRoom', function(name) {
+      var retry = confirm(name + " has left the room. Do you want another random chat?");
+      if (retry) {
+        var $stranger = $('<div id="stranger"></div>');
+        var $annouce = $('<div class="annoucement">Another stranger has entered. Enjoy!</div>');
+        $('.waitingZone').show();
+        $('.chatView').empty();
+        $('.chatView').append($stranger);
+        $('.chatView').append($annouce);
+        $('.chatView').hide();
+        socket.emit('requestRandomChat', $('#name').val());
+      }
+      else if (!retry) {
+        //console.log("User ended random chat");
+        $('#online').css("background-color","red");
+        $('.annoucement').html("Stranger left the room.");
+        var $div = $('<p class="annoucement">From Bot: Random chat is ended. Good Bye!</p>');
+        $('.chatView').append($div);
+      }
+    });
 
-        function chat_submit() {
-	        socket.emit('send message', $('#name').val(), $('#message').val());
-	        $('#message').val("");
-	        $("#message").focus();
-	        e.preventDefault();
-        }
+    //User typing and sending a message
+    function chat_submit() {
+      socket.emit('send message', $('#name').val(), $('#message').val());
+      $('#message').val("");
+      $("#message").focus();
+      e.preventDefault();
+    }
 
-        function Enter_Check(){
-	        if(event.keyCode == 13){
-            chat_submit();
-		        document.getElementById('message').value = "";
-	       }
-        }
-    </script>
+    function Enter_Check() {
+      if (event.keyCode == 13) {
+        chat_submit();
+        document.getElementById('message').value = "";
+      }
+    }
+  </script>
 </body>
+
 </html>
