@@ -3,6 +3,7 @@ var http = require('http');
 var fs = require('fs');
 var socket_io = require('socket.io').listen(http);
 
+//Creating a server
 var server = http.createServer(function handler(req, res) {
 
   var url = req.url;
@@ -22,11 +23,9 @@ const totalRoomList = {};
 const totalUserList = {};
 const waitingQueue = [];
 
-var nick_name = ["Vanila", "Chocolate", "Strawberry", "Matcha", "Cappuccino"];
-
 io.on('connection', function(socket) {
   socket.emit('connected');
-  
+
   socket.on('requestRandomChat', (name) => {
     totalUserList[socket.id] = name;
     if (waitingQueue.length > 0) {
@@ -56,8 +55,7 @@ io.on('connection', function(socket) {
           }
         });
       }
-    }
-    else {
+    } else {
       waitingQueue.push(socket);
       io.to(socket.id).emit('completeMatch', {
         matched: false
@@ -66,13 +64,21 @@ io.on('connection', function(socket) {
   });
 
   //User wants to send a message
-  socket.on('send message', (name,text) => {
+  socket.on('send message', (name, text) => {
     const room_key = totalRoomList[socket.id];
-    console.log(name);
+    //console.log(name);
 
     //massage = name + ': ' + text;
-    io.sockets.in(room_key).emit('receive message', name,text);
+    io.sockets.in(room_key).emit('receive message', name, text);
   });
- });
 
- server.listen(5000);
+  socket.on('disconnect', function () {
+    const room_key = totalRoomList[socket.id];
+    const name = totalUserList[socket.id]
+    console.log(name + " is disconnected");
+    io.sockets.in(room_key).emit('leftRoom', name);
+    socket.leave(room_key);
+  })
+});
+
+server.listen(5000);
