@@ -1,23 +1,24 @@
 /* Server source*/
-var http = require('http');
-var fs = require('fs');
-var socket_io = require('socket.io').listen(http);
+const http = require('http');
+const fs = require('fs');
+const socket_io = require('socket.io').listen(http);
 
 //Creating a server
-var server = http.createServer(function handler(req, res) {
-
+const server = http.createServer(function handler(req, res) {
   var url = req.url;
   if (req.url == '/') {
     url = '/chat.html';
   }
   if (req.url == '/favicon.ico') {
-    return res.writeHead(404);
+    res.writeHead(404);
+    res.end();
+    return;
   }
   res.writeHead(200);
   res.end(fs.readFileSync(__dirname + url));
 });
 
-var io = socket_io.listen(server);
+const io = socket_io.listen(server);
 
 const totalRoomList = {};
 const totalUserList = {};
@@ -81,4 +82,5 @@ io.on('connection', function(socket) {
   })
 });
 
-server.listen(5000);
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
