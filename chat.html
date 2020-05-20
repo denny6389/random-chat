@@ -71,7 +71,7 @@
     socket.on('leftRoom', function(name) {
       var retry = confirm(name + " has left the room. Do you want another random chat?");
       if (retry) {
-        var $stranger = $('<div id="stranger"></div>');
+        var $stranger = $('<div id="strangerInfo"><div id = "stranger"></div><div id = "online"></div></div>');
         var $annouce = $('<div class="annoucement">Another stranger has entered. Enjoy!</div>');
         $('.waitingZone').show();
         $('.chatView').empty();
